@@ -1,0 +1,57 @@
+name: Automate Service Provisioning with Terraform
+
+on:
+  push:
+    branches:
+      - rk/infra-automation
+    paths:
+      - 'infrastructure/terraform'
+  workflow_dispatch:
+
+env:
+  WORKSPACE: ${{ github.ref_name }}
+  REPOSITORY: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set TF Backend
+      if: ${{ github.ref == 'rk/infra-automation' }}
+      env: 
+      shell: bash
+      run: |
+        cat <<EOF > state.tf
+        terraform {
+          backend "azurerm" {
+            resource_group_name  = "${ var.resource_group_name }"
+            storage_account_name = "${ var.storage_account_name }"
+            container_name       = "${ var.container_name }"
+            key                  = "${ var.key }"
+          }
+        }
+        EOF
+
+    - name: Initialize Terraform
+      shell: bash
+      run: echo "terraform init"
+
+    - name: Set Terraform Workspace
+      shell: bash
+      run: echo "terraform workspace select $WORKSPACE"
+
+    - name: Plan Terraform
+      shell: bash
+      run: echo "terraform plan -out tfplan"
+
+    - name: Approval Gate to Apply Terraform
+      shell: bash
+      run: echo "terraform approval gate"
+
+    - name: Apply Terraform
+      shell: bash
+      run: echo "terraform apply tfplan"

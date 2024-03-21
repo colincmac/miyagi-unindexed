@@ -1,0 +1,8 @@
+{
+  "type":   "openai",
+  "endpoint": "NOT-USED-BUT-REQUIRED-FOR-PARSER",
+  "model":  "text-davinci-003",
+  "apikey": "... your OpenAI key ...",
+  "org":    "",
+  "bingApiKey": "... your Bing API key ..."
+}
